@@ -1,0 +1,96 @@
+
+
+import numpy as np
+
+def heaviside(x: np.ndarray) -> np.ndarray:
+    """
+    Apply the heaviside function element-wise.
+
+    Args:
+        x: scalar or np.ndarray of floats
+
+    Returns:
+        np.ndarray of same shape as x, with values of 0 or 1
+    """
+    return np.array(x >= 0, dtype=int)
+
+def sigmoid(x: np.ndarray) -> np.ndarray:
+    """
+    Apply the sigmoid function element-wise.
+
+    σ(x) = 1 / (1 + exp(-x))
+
+    Args:
+        x: scalar or np.ndarray of floats
+
+    Returns:
+        np.ndarray of same shape as x, with values in (0,1)
+    """
+    return 1 / (1 + np.exp(-x))
+
+def arctan(x: np.ndarray) -> np.ndarray:
+    """
+    Apply the ArcTan function element-wise.
+    Note: ArcTan has been scaled to (-1, 1).
+
+    φ(x) = (2/π) * arctan(x)
+
+    Args:
+        x: scalar or np.ndarray of floats
+
+    Returns:
+        np.ndarray of same shape as x, with values in (-1,1)
+    """
+dataset = [
+    ((0,0),0),
+    ((0,1),0),
+    ((1,0),0),
+    ((1,1),1)
+]
+
+print(f"{'Input':<7} | {'Output':<6}")
+print("-" * 17)
+
+for d, h in dataset:
+    print(f"{d!s:<7} | {h:<6}")
+# Store the input data (X) and output (y) as numpy arrays
+X = np.array([inp for inp, _ in dataset], dtype=int)   # shape (n_samples, n_features)
+y = np.array([out for _, out in dataset], dtype=int)   # shape (n_samples,)
+
+# Here y is the desired output (what comes out of the heaviside or sigmoid). We can generate a pre-activation z such that h(z) = y.
+z = 2*y - 1
+
+print(f"{'Input':<5} | {'Output: y':<6} | {'Pre-Activation: z':<15}")
+print("-" * 38)
+
+for d, h, p in zip(X, y, z):
+    print(f"{d!s:<5} | {h:<9} | {p:<17}")
+# We can add a stack of 1s to the end of X to generate X with bias column
+X_b = np.hstack([X, np.ones((X.shape[0], 1), dtype=int)])
+
+print("X_b (X with bias column):\n", X_b)
+w_b = np.linalg.inv(X_b.T @ X_b) @ X_b.T @ z
+print('w_b =',w_b)
+#We can check to see if X_b.w_b is equal to z
+temp_z = X_b @ w_b
+print(temp_z == z)
+
+print(f"{'Input':<11} | {'Model Output (z)':<20} | {'Goal Output (z)':<10}")
+print("-" * 53)
+
+for d,a,b in zip(X,temp_z, z):
+    print(f"{d!s:<11} | {a:<20} | {b:<10}")
+print(temp_z - z)
+print(np.linalg.norm(temp_z - z))
+#We can check to see if h(X_b.w_b) is equal to h(z) = y
+temp_z = X_b @ w_b
+temp_y_heaviside = heaviside(temp_z)
+temp_y_sigmoid = sigmoid(temp_z)
+
+print(f"{'Input':<11} | {'Model Output Heaviside (y)':<26} | {'Model Output Sigmoid (y)':<26} |{' Goal Output (y)':<10}")
+print("-" * 84)
+
+for d,a,b,c in zip(X,temp_y_heaviside, temp_y_sigmoid, y):
+    print(f"{d!s:<11} | {a:<26} | {b:<26} | {c:<16}")
+
+    return (2/np.pi) * np.arctan(x)
